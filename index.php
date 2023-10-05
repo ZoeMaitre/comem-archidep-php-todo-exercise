@@ -25,10 +25,10 @@ if (isset($_POST['action'])) {
      */
     case 'new':
 
-      $title = $_POST['title'];
+      $title = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_SPECIAL_CHARS);
       if ($title && $title !== '') {
-        $insertQuery = 'INSERT INTO todo VALUES(NULL, \''.$title.'\', FALSE, CURRENT_TIMESTAMP)';
-        if (!$db->query($insertQuery)) {
+        $insertQuery = 'INSERT INTO todo VALUES(NULL, :title, FALSE, CURRENT_TIMESTAMP)';
+        if (!$db->prepare($insertQuery)->execute([ 'title' => $title ])) {
           die(print_r($db->errorInfo(), true));
         }
       }
@@ -42,10 +42,10 @@ if (isset($_POST['action'])) {
      */
     case 'toggle':
 
-      $id = $_POST['id'];
+      $id = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_NUMBER_INT);
       if(is_numeric($id)) {
-        $updateQuery = 'UPDATE todo SET done = !done WHERE id = ' . $id ;
-        if(!$db->query($updateQuery)) {
+        $updateQuery = 'UPDATE todo SET done = !done WHERE id = :id';
+        if (!$db->prepare($updateQuery)->execute([ 'id' => $id ])) {
           die(print_r($db->errorInfo(), true));
         }
       }
@@ -58,10 +58,10 @@ if (isset($_POST['action'])) {
      */
     case 'delete':
 
-      $id = $_POST['id'];
+      $id = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_NUMBER_INT);
       if(is_numeric($id)) {
-        $deleteQuery = 'DELETE FROM todo WHERE id = ' . $id ;
-        if(!$db->query($deleteQuery)) {
+        $deleteQuery = 'DELETE FROM todo WHERE id = :id';
+        if(!$db->prepare($deleteQuery)->execute([ 'id' => $id ])) {
           die(print_r($db->errorInfo(), true));
         }
       }
